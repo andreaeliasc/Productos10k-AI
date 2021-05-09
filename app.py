@@ -45,6 +45,8 @@ instructions = tk.Label(root, text="1. Realizar Feature Extraction", font="Ralew
 instructions.grid(columnspan=3, rowspan=1, column=0, row=1)
 instructions1 = tk.Label(root, text="2. Mostrar Clusters de imagenes utilizando TSNE", font="Raleway")
 instructions1.grid(columnspan=3, rowspan=1, column=0, row=4)
+instructions2 = tk.Label(root, text="3. Ver las 10 imágenes más similares", font="Raleway")
+instructions2.grid(columnspan=3, rowspan=1, column=0, row=7)
 
 def featureExtraction():
     # file = askopenfile(parent=root, mode='rb', title="Choose a file", filetype=[("Image file", ".jpg")])
@@ -52,7 +54,7 @@ def featureExtraction():
     #     queryImg = Image.open(file)
     model_architecture = 'resnet'
     model = model_picker(model_architecture)
-    features = extract_features('C:/Users/andre/OneDrive/Desktop/Inteligencia Artificial/Productos10k-AI/datasets/product10k/chumpas/1023627.jpg', model)
+    features = extract_features('datasets/product10k/chumpas/1023627.jpg', model)
     print(len(features))
     
     root_dir = 'datasets/product10k'
@@ -194,6 +196,77 @@ def similaritySearch():
 
     show_tsne(tsne_results[:, 0], tsne_results[:, 1], selected_filenames)
 
+def browseFile():
+    file = askopenfile(parent=root, mode='rb', title="Choose a file", filetype=[("Image file", ".jpg")])
+    if file:
+
+        filenames = pickle.load(open('datasets/data/filenames-product10k.pickle', 'rb'))
+        feature_list = pickle.load(open('datasets/data/features-product10k-resnet.pickle','rb'))
+        class_ids = pickle.load(open('datasets/data/class_ids-product10k.pickle', 'rb'))
+        neighbors = NearestNeighbors(n_neighbors=10,algorithm='ball_tree',metric='euclidean').fit(feature_list)
+
+        model_architecture = 'resnet'
+        model = model_picker(model_architecture)
+
+        input_shape = (224, 224, 3)
+        img = image.load_img(file.name, target_size=(input_shape[0], input_shape[1]))
+        img_array = image.img_to_array(img)
+        expanded_img_array = np.expand_dims(img_array, axis=0)
+        preprocessed_img = preprocess_input(expanded_img_array)
+
+        test_img_features = model.predict(preprocessed_img, batch_size=1)
+
+        _, indices = neighbors.kneighbors(test_img_features)
+
+        def similar_images(indices):
+            plt.figure(figsize=(15,10), facecolor='white')
+            plotnumber = 1    
+            for index in indices:
+                if plotnumber<=len(indices) :
+                    ax = plt.subplot(2,5,plotnumber)
+                    plt.imshow(mpimg.imread(filenames[index]), interpolation='lanczos')            
+                    plotnumber+=1
+            plt.tight_layout()
+            plt.show()
+
+        print(indices.shape)
+        print("hola")
+
+        plt.imshow(mpimg.imread(file.name), interpolation='lanczos')
+        plt.xlabel(file.name.split('.')[0] + '_Original Image',fontsize=20)
+        plt.show()
+        print('********* Predictions ***********')
+        similar_images(indices[0])
+        
+
+
+        # model = open('datasets/model/model-finetuned.h5', 'r')
+        # filenames = pickle.load(open('datasets/data/filenames-product10k.pickle', 'rb'))
+        # feature_list = pickle.load(open('datasets/data/features-product10k-resnet.pickle','rb'))
+        # class_ids = pickle.load(open('datasets/data/class_ids-product10k.pickle', 'rb'))
+
+        # input_shape = (800, 800, 3)
+        # img = image.load_img(file.name, target_size=(input_shape[0], input_shape[1]))
+        # img_array = image.img_to_array(img)
+        # expanded_img_array = np.expand_dims(img_array, axis=0)
+        # preprocessed_img = preprocess_input(expanded_img_array)
+
+        
+
+        # test_img_features = model.predict(preprocessed_img, batch_size=1)
+        # _, indices = neighbors.kneighbors(test_img_features)
+        # def similar_images(indices):
+        #     plt.figure(figsize=(15,10), facecolor='white')
+        #     plotnumber = 1    
+        #     for index in indices:
+        #         if plotnumber<=len(indices) :
+        #             ax = plt.subplot(2,4,plotnumber)
+        #             plt.imshow(mpimg.imread(filenames[index]), interpolation='lanczos')            
+        #             plotnumber+=1
+        #     plt.tight_layout()
+        # print(indices.shape)
+
+
 
 
 
@@ -213,6 +286,12 @@ cluster_text = tk.StringVar()
 cluster_btn = tk.Button(root, textvariable=cluster_text, command=lambda:similaritySearch(), font="Raleway", bg="#0d1117", fg="white", height=1, width=15)
 cluster_text.set("Start")
 cluster_btn.grid(column=1, row=5, rowspan=1)
+
+#Upload Button
+upload_text = tk.StringVar()
+upload_btn = tk.Button(root, textvariable=upload_text, command=lambda:browseFile(), font="Raleway", bg="#0d1117", fg="white", height=1, width=15)
+upload_text.set("Browse")
+upload_btn.grid(column=1, row=8, rowspan=1)
 
 
 if os.path.isfile('datasets/data/class_ids-product10k.pickle') and os.path.isfile('datasets/data/features-product10k-resnet.pickle') and os.path.isfile('datasets/data/filenames-product10k.pickle') and os.path.isfile('datasets/data/features-product10k-resnet-finetuned.pickle'):
