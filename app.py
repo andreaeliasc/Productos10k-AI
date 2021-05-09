@@ -4,7 +4,6 @@ from tkinter.filedialog import askopenfile
 import numpy as np
 from numpy.linalg import norm
 import pickle
-from tqdm import tqdm, tqdm_notebook
 import os
 import random
 import time
@@ -138,4 +137,13 @@ browse_text = tk.StringVar()
 browse_btn = tk.Button(root, textvariable=browse_text, command=lambda:featureExtraction(), font="Raleway", bg="#0d1117", fg="white", height=1, width=15)
 browse_text.set("Start")
 browse_btn.grid(column=1, row=2, rowspan=1)
+if os.path.isfile('datasets/data/class_ids-product10k.pickle') and os.path.isfile('datasets/data/features-product10k-resnet.pickle') and os.path.isfile('datasets/data/filenames-product10k.pickle') and os.path.isfile('datasets/data/features-product10k-resnet-finetuned.pickle'):
+    #instructions
+    filesFound = tk.Label(root, text="Features, Class_IDs and Filenames FOUND", font="Raleway 8")
+    filesFound.grid(columnspan=3, rowspan=1, column=0, row=3)
+else:
+    filesFound = tk.Label(root, text="Features, Class_IDs and Filenames FOUND", font="Raleway 8")
+    filesFound.grid(columnspan=3, rowspan=1, column=0, row=3)
+    
 root.mainloop()
+

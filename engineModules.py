@@ -1,7 +1,6 @@
 import numpy as np
 from numpy.linalg import norm
 import pickle
-from tqdm import tqdm, tqdm_notebook
 import os
 import random
 import time
@@ -99,7 +98,6 @@ def model_maker():
 # Commented out IPython magic to ensure Python compatibility.
 import numpy as np
 import pickle
-from tqdm import tqdm, tqdm_notebook
 import random
 import time
 from sklearn.manifold import TSNE
