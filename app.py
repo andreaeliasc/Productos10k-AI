@@ -19,6 +19,17 @@ from tensorflow.keras.applications.inception_v3 import InceptionV3
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Flatten, Dense, Dropout, GlobalAveragePooling2D
 from engineModules import *
+from pathlib import Path
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+from sklearn.manifold import TSNE
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib.cbook import get_sample_data
+
+
+os.getcwd()
+
 
 root = tk.Tk()
 
@@ -32,6 +43,8 @@ title.grid(column=1, row=0)
 #instructions
 instructions = tk.Label(root, text="1. Realizar Feature Extraction", font="Raleway")
 instructions.grid(columnspan=3, rowspan=1, column=0, row=1)
+instructions1 = tk.Label(root, text="2. Mostrar Clusters de imagenes utilizando TSNE", font="Raleway")
+instructions1.grid(columnspan=3, rowspan=1, column=0, row=4)
 
 def featureExtraction():
     # file = askopenfile(parent=root, mode='rb', title="Choose a file", filetype=[("Image file", ".jpg")])
@@ -39,7 +52,7 @@ def featureExtraction():
     #     queryImg = Image.open(file)
     model_architecture = 'resnet'
     model = model_picker(model_architecture)
-    features = extract_features('datasets/product10k/chumpas/1005559.jpg', model)
+    features = extract_features('C:/Users/andre/OneDrive/Desktop/Inteligencia Artificial/Productos10k-AI/datasets/product10k/chumpas/1023627.jpg', model)
     print(len(features))
     
     root_dir = 'datasets/product10k'
@@ -132,11 +145,76 @@ def featureExtraction():
     print("---- Feature Extraction ended------")
 
 
+def similaritySearch():
+    filenames = pickle.load(open('datasets/data/filenames-product10k.pickle', 'rb'))
+    feature_list = pickle.load(open('datasets/data/features-product10k-resnet.pickle','rb'))
+    class_ids = pickle.load(open('datasets/data/class_ids-product10k.pickle', 'rb'))
+
+    num_images = len(filenames)
+    num_features_per_image = len(feature_list[0])
+    print("Number of images = ", num_images)
+    print("Number of features per image = ", num_features_per_image)
+
+    neighbors = NearestNeighbors(n_neighbors=5,algorithm='brute',metric='euclidean').fit(feature_list)
+    # random_index = 3
+    # distances, indices = neighbors.kneighbors([feature_list[random_index]])
+    # plt.imshow(mpimg.imread(filenames[random_index]), interpolation='lanczos')
+    # plt.show()
+    
+    neighbors = NearestNeighbors(n_neighbors=len(feature_list),
+                                algorithm='brute',
+                                metric='euclidean').fit(feature_list)
+    distances, indices = neighbors.kneighbors(feature_list)
+
+    # Calculating some stats
+    print("Median distance between all photos: ", np.median(distances))
+    print("Max distance between all photos: ", np.max(distances))
+    print("Median distance among most similar photos: ",
+        np.median(distances[:, 2]))
+
+    selected_features = feature_list[:]
+    selected_class_ids = class_ids[:]
+    selected_filenames = filenames[:]
+# You can play with these values and see how the results change
+    n_components = 2
+    verbose = 1
+    perplexity = 30
+    n_iter = 1000
+    metric = 'euclidean'
+
+    time_start = time.time()
+    tsne_results = TSNE(n_components=n_components,
+                        verbose=verbose,
+                        perplexity=perplexity,
+                        n_iter=n_iter,
+                        metric=metric).fit_transform(selected_features)
+
+    print('t-SNE done! Time elapsed: {} seconds'.format(time.time() - time_start))
+
+
+    show_tsne(tsne_results[:, 0], tsne_results[:, 1], selected_filenames)
+
+
+
+
+    
+    
+    
+
+
 #Feature Extraction button
 browse_text = tk.StringVar()
 browse_btn = tk.Button(root, textvariable=browse_text, command=lambda:featureExtraction(), font="Raleway", bg="#0d1117", fg="white", height=1, width=15)
 browse_text.set("Start")
 browse_btn.grid(column=1, row=2, rowspan=1)
+
+#Clusters Button
+cluster_text = tk.StringVar()
+cluster_btn = tk.Button(root, textvariable=cluster_text, command=lambda:similaritySearch(), font="Raleway", bg="#0d1117", fg="white", height=1, width=15)
+cluster_text.set("Start")
+cluster_btn.grid(column=1, row=5, rowspan=1)
+
+
 if os.path.isfile('datasets/data/class_ids-product10k.pickle') and os.path.isfile('datasets/data/features-product10k-resnet.pickle') and os.path.isfile('datasets/data/filenames-product10k.pickle') and os.path.isfile('datasets/data/features-product10k-resnet-finetuned.pickle'):
     #instructions
     filesFound = tk.Label(root, text="Features, Class_IDs and Filenames FOUND", font="Raleway 8")
@@ -146,4 +224,9 @@ else:
     filesFound.grid(columnspan=3, rowspan=1, column=0, row=3)
     
 root.mainloop()
+
+
+
+
+
 
