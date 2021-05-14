@@ -1,34 +1,45 @@
-import numpy as np
-from numpy.linalg import norm
-import pickle
 import os
 import random
 import time
 import math
+import numpy as np
+from numpy.linalg import norm
+
+import pickle
+
 import tensorflow
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
-from tensorflow.keras.applications.vgg16 import VGG16
-from tensorflow.keras.applications.vgg19 import VGG19
-from tensorflow.keras.applications.mobilenet import MobileNet
-from tensorflow.keras.applications.inception_v3 import InceptionV3
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Flatten, Dense, Dropout, GlobalAveragePooling2D
+
 from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
+
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from matplotlib.cbook import get_sample_data
 
+import PIL
+from PIL import Image
+from sklearn.neighbors import NearestNeighbors
+
+import glob
+
+#Valores constantes
 TRAIN_SAMPLES = 18
 NUM_CLASSES = 4
 IMG_WIDTH, IMG_HEIGHT = 800, 800
 
+#Tipos de extensiones de imagenes aceptados
 extensions = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG']
 
 def extract_features(img_path, model):
     input_shape = (224, 224, 3)
-    img = image.load_img(img_path,
-                         target_size=(input_shape[0], input_shape[1]))
+    img = image.load_img(img_path,target_size=(input_shape[0], input_shape[1]))
     img_array = image.img_to_array(img)
     expanded_img_array = np.expand_dims(img_array, axis=0)
     preprocessed_img = preprocess_input(expanded_img_array)
@@ -60,23 +71,6 @@ def model_maker():
     return Model(inputs=input, outputs=predictions)
 
 # Similarity search
-
-# Commented out IPython magic to ensure Python compatibility.
-import numpy as np
-import pickle
-import random
-import time
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
-import PIL
-from PIL import Image
-from sklearn.neighbors import NearestNeighbors
-
-import glob
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-
 def classname(str):
     return str.split('/')[-2]
 
