@@ -52,8 +52,10 @@ def featureExtraction():
     # file = askopenfile(parent=root, mode='rb', title="Choose a file", filetype=[("Image file", ".jpg")])
     # if file:
     #     queryImg = Image.open(file)
-    model_architecture = 'resnet'
-    model = model_picker(model_architecture)
+    model = ResNet50(weights='imagenet',
+                         include_top=False,
+                         input_shape=(224, 224, 3),
+                        pooling='max')
     features = extract_features('datasets/product10k/chumpas/1023627.jpg', model)
     print(len(features))
     
@@ -205,8 +207,10 @@ def browseFile():
         class_ids = pickle.load(open('datasets/data/class_ids-product10k.pickle', 'rb'))
         neighbors = NearestNeighbors(n_neighbors=10,algorithm='ball_tree',metric='euclidean').fit(feature_list)
 
-        model_architecture = 'resnet'
-        model = model_picker(model_architecture)
+        model = ResNet50(weights='imagenet',
+                         include_top=False,
+                         input_shape=(224, 224, 3),
+                        pooling='max')
 
         input_shape = (224, 224, 3)
         img = image.load_img(file.name, target_size=(input_shape[0], input_shape[1]))
@@ -239,42 +243,6 @@ def browseFile():
         similar_images(indices[0])
         
 
-
-        # model = open('datasets/model/model-finetuned.h5', 'r')
-        # filenames = pickle.load(open('datasets/data/filenames-product10k.pickle', 'rb'))
-        # feature_list = pickle.load(open('datasets/data/features-product10k-resnet.pickle','rb'))
-        # class_ids = pickle.load(open('datasets/data/class_ids-product10k.pickle', 'rb'))
-
-        # input_shape = (800, 800, 3)
-        # img = image.load_img(file.name, target_size=(input_shape[0], input_shape[1]))
-        # img_array = image.img_to_array(img)
-        # expanded_img_array = np.expand_dims(img_array, axis=0)
-        # preprocessed_img = preprocess_input(expanded_img_array)
-
-        
-
-        # test_img_features = model.predict(preprocessed_img, batch_size=1)
-        # _, indices = neighbors.kneighbors(test_img_features)
-        # def similar_images(indices):
-        #     plt.figure(figsize=(15,10), facecolor='white')
-        #     plotnumber = 1    
-        #     for index in indices:
-        #         if plotnumber<=len(indices) :
-        #             ax = plt.subplot(2,4,plotnumber)
-        #             plt.imshow(mpimg.imread(filenames[index]), interpolation='lanczos')            
-        #             plotnumber+=1
-        #     plt.tight_layout()
-        # print(indices.shape)
-
-
-
-
-
-    
-    
-    
-
-
 #Feature Extraction button
 browse_text = tk.StringVar()
 browse_btn = tk.Button(root, textvariable=browse_text, command=lambda:featureExtraction(), font="Raleway", bg="#0d1117", fg="white", height=1, width=15)
@@ -299,7 +267,7 @@ if os.path.isfile('datasets/data/class_ids-product10k.pickle') and os.path.isfil
     filesFound = tk.Label(root, text="Features, Class_IDs and Filenames FOUND", font="Raleway 8")
     filesFound.grid(columnspan=3, rowspan=1, column=0, row=3)
 else:
-    filesFound = tk.Label(root, text="Features, Class_IDs and Filenames FOUND", font="Raleway 8")
+    filesFound = tk.Label(root, text="Features, Class_IDs and Filenames NOT FOUND", font="Raleway 8")
     filesFound.grid(columnspan=3, rowspan=1, column=0, row=3)
     
 root.mainloop()

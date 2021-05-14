@@ -25,43 +25,6 @@ IMG_WIDTH, IMG_HEIGHT = 800, 800
 
 extensions = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG']
 
-def model_picker(name):
-    if (name == 'vgg16'):
-        model = VGG16(weights='imagenet',
-                      include_top=False,
-                      input_shape=(224, 224, 3),
-                      pooling='max')
-    elif (name == 'vgg19'):
-        model = VGG19(weights='imagenet',
-                      include_top=False,
-                      input_shape=(224, 224, 3),
-                      pooling='max')
-    elif (name == 'mobilenet'):
-        model = MobileNet(weights='imagenet',
-                          include_top=False,
-                          input_shape=(224, 224, 3),
-                          pooling='max',
-                          depth_multiplier=1,
-                          alpha=1)
-    elif (name == 'inception'):
-        model = InceptionV3(weights='imagenet',
-                            include_top=False,
-                            input_shape=(224, 224, 3),
-                            pooling='max')
-    elif (name == 'resnet'):
-        model = ResNet50(weights='imagenet',
-                         include_top=False,
-                         input_shape=(224, 224, 3),
-                        pooling='max')
-    # elif (name == 'xception'):
-    #     model = Xception(weights='imagenet',
-    #                      include_top=False,
-    #                      input_shape=(224, 224, 3),
-    #                      pooling='max')
-    else:
-        print("Specified model not available")
-    return model
-
 def extract_features(img_path, model):
     input_shape = (224, 224, 3)
     img = image.load_img(img_path,
