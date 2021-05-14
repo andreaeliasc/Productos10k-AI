@@ -37,21 +37,26 @@ def feature_extraction():
 
     """ Descripción de esta función """
 
-    model = ResNet50(weights='imagenet', #Creación de la CNN ResNet50: 50 Layers Deep
+    #Creación de la CNN ResNet50: 50 Layers Deep
+    model = ResNet50(weights='imagenet',
                          include_top=False,
                          input_shape=(224, 224, 3),
                         pooling='max')
 
-    filenames = sorted(get_file_list(ROOT_DIR)) #Dentro de esta lista se encuentran todos nombres de los archivos en el dataset, de manera ordenada.
+    #Dentro de esta lista se encuentran todos nombres de los archivos en el dataset, de manera ordenada.
+    filenames = sorted(get_file_list(ROOT_DIR))
 
+    #Se realiza la extracción de features a cada imagen cuyo nombre está en la lista de filenames
+    #y el resultado se agrega a la lista llamada feature_list
     feature_list = []
-    for i in range(len(filenames)):                                     #Se realiza la extracción de features a cada imagen cuyo nombre está en la lista de filenames
-        feature_list.append(extract_features(filenames[i], model))      #y el resultado se agrega a la lista llamada feature_list
+    for i in range(len(filenames)):                                     
+        feature_list.append(extract_features(filenames[i], model))
     
     batch_size = 64
+    #Genera batches de datos de imagenes de tensors con data augmentation en tiempo real
     datagen = tensorflow.keras.preprocessing.image.ImageDataGenerator(preprocessing_function=preprocess_input)
-
-    generator = datagen.flow_from_directory(ROOT_DIR,
+    #Toma un path a un directorio y se general los batches de la data aumentada
+    generator = datagen.flow_from_directory(ROOT_DIR,               
                                             target_size=(224, 224),
                                             batch_size=batch_size,
                                             class_mode=None,
@@ -133,6 +138,7 @@ def similarity_search():
 
     """ Descripción de esta función """
 
+    #Se cargan los features, filenames e ids guardados en la extraccion de features
     filenames = pickle.load(open('datasets/data/filenames-product10k.pickle', 'rb'))
     feature_list = pickle.load(open('datasets/data/features-product10k-resnet.pickle','rb'))
     class_ids = pickle.load(open('datasets/data/class_ids-product10k.pickle', 'rb'))
@@ -143,26 +149,20 @@ def similarity_search():
     print("Number of features per image = ", num_features_per_image)
 
     neighbors = NearestNeighbors(n_neighbors=5,algorithm='brute',metric='euclidean').fit(feature_list)
-    # random_index = 3
-    # distances, indices = neighbors.kneighbors([feature_list[random_index]])
-    # plt.imshow(mpimg.imread(filenames[random_index]), interpolation='lanczos')
-    # plt.show()
-    
     neighbors = NearestNeighbors(n_neighbors=len(feature_list),
                                 algorithm='brute',
                                 metric='euclidean').fit(feature_list)
     distances, indices = neighbors.kneighbors(feature_list)
 
-    # Calculating some stats
+    # Estadisticas del algoritmo
     print("Median distance between all photos: ", np.median(distances))
     print("Max distance between all photos: ", np.max(distances))
-    print("Median distance among most similar photos: ",
-        np.median(distances[:, 2]))
+    print("Median distance among most similar photos: ", np.median(distances[:, 2]))
 
     selected_features = feature_list[:]
     selected_class_ids = class_ids[:]
     selected_filenames = filenames[:]
-    # You can play with these values and see how the results change
+    
     n_components = 2
     verbose = 1
     perplexity = 30
