@@ -35,7 +35,7 @@ ROOT_DIR = 'datasets/product10k'
 
 def feature_extraction():
 
-    """ Descripción de esta función """
+    """ En esta funcion se extrae los features de cada una de las imagenes con ayuda de resnet50 """
 
     #Creación de la CNN ResNet50: 50 Layers Deep
     model = ResNet50(weights='imagenet',
@@ -136,7 +136,7 @@ def feature_extraction():
 
 def similarity_search():
 
-    """ Descripción de esta función """
+    """ En esta funcion se efectua la busqueda de similitudes, donde se obtienen los vecinos mas cercanos y la distancia media y naxima entre los features"""
 
     #Se cargan los features, filenames e ids guardados en la extraccion de features
     filenames = pickle.load(open('datasets/data/filenames-product10k.pickle', 'rb'))
@@ -181,9 +181,12 @@ def similarity_search():
 
     show_tsne(tsne_results[:, 0], tsne_results[:, 1], selected_filenames)
 
+
+#En esta funcion se trabaja lo que es el upload de la fotografia de la que queremos 
+
 def upload_and_search():
 
-    """ Descripción de esta función """
+    """ Funcion que realiza el upload de la fotografia de la cual se quieren visualizar las imagenes mas similares """
 
     file = askopenfile(parent=root, mode='rb', title="Choose a file", filetype=[("Image file", ".jpg")])
     if file:

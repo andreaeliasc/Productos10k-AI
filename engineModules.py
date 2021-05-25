@@ -48,7 +48,7 @@ def extract_features(img_path, model):
     normalized_features = flattened_features / norm(flattened_features)
     return normalized_features
 
-
+#Se obtiene la lista de los archivos tomando como parametro el root
 def get_file_list(root_dir):
     file_list = []
     for root, directories, filenames in os.walk(root_dir):
@@ -56,6 +56,8 @@ def get_file_list(root_dir):
             if any(ext in filename for ext in extensions):
                 file_list.append(os.path.join(root, filename))
     return file_list
+
+# Se realiza el modelo resnet 50
 
 def model_maker():
     base_model = ResNet50(include_top=False,
@@ -75,12 +77,12 @@ def classname(str):
     return str.split('/')[-2]
 
 
-# Helper function to get the classname and filename
+# Funcion que obtiene el class name y filename
 def classname_filename(str):
     return str.split('/')[-2] + '/' + str.split('/')[-1]
 
 
-# Helper functions to plot the nearest images given a query image
+#Esta funcion nos grafica las imagenes mas similares utilizando la libreria matplotlib
 def plot_images(filenames, distances):
     images = []
     for filename in filenames:
@@ -101,6 +103,8 @@ def plot_images(filenames, distances):
 from matplotlib.cbook import get_sample_data
 
 
+
+
 def plot_images_in_2d(x, y, image_paths, axis=None, zoom=1):
     if axis is None:
         axis = plt.gca()
@@ -116,12 +120,14 @@ def plot_images_in_2d(x, y, image_paths, axis=None, zoom=1):
     axis.update_datalim(np.column_stack([x, y]))
     axis.autoscale()
 
-
+#Se muestra el clustering realizado con el algoritmo t-SNE
 def show_tsne(x, y, selected_filenames):
     fig, axis = plt.subplots()
     fig.set_size_inches(22, 22, forward=True)
     plot_images_in_2d(x, y, selected_filenames, zoom=0.3, axis=axis)
     plt.show()
+
+    #Se muestra el clostering realizado con el algorimo t-sne 
 
 def tsne_to_grid_plotter_manual(x, y, selected_filenames):
     S = 2000
